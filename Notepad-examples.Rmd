@@ -1,0 +1,107 @@
+---
+title: "Notepad-Examples"
+author: "`r Sys.getenv('USERNAME')`"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+## basic settings
+knitr::opts_chunk$set(echo = FALSE,
+                      message=FALSE,
+                      warning=FALSE
+                      )
+
+## load common libraries
+library(tidyverse)
+library(lubridate)
+library(scales)
+library(plotly)
+library(PerformanceAnalytics)
+
+## set variables
+color.bar <- "cornflowerblue"
+
+## Reference: R Markdown cheatsheet
+## https://www.rstudio.com/wp-content/uploads/2016/03/rmarkdown-cheatsheet-2.0.pdf
+
+
+```
+
+## Get some data
+
+```{r LOAD DATA}
+## grab data -> can use vancouver weather data in other R project
+# data <- read_csv(file.choose())
+# write_csv(data, 'data-input/vw-data.csv')
+
+## set up to use data
+idata <- read_csv('data-input/vw-data.csv')
+
+## filter data for investigation
+idata2 <- idata %>% filter(Year>=2017, Month==4) ## Daily April data for recent years
+
+```
+
+
+## Explore summary
+
+```{r SUMMARY 1}
+
+## summary stats for all
+summary(idata2)
+
+## summary statistics for each month
+idata2.mth <- idata2 %>% group_by(Year, Month) %>% summarize(
+  max.mean=mean(Max.Temp),
+  min.mean=mean(Min.Temp),
+  mean.mean=mean(Mean.Temp),
+  mean.precip=mean(Total.Precip)
+) 
+idata2.mth
+
+chart.title <- "Mean temperatures for same month, each year"
+ggplot(idata2.mth, aes(x=Year, y=mean.mean))+geom_col(fill=color.bar)+
+  scale_y_continuous(expand=c(0,0))+
+  theme_minimal()+
+  labs(title=chart.title)
+
+```
+
+### Distribution: what is the distribution for the temperatures in each month?
+
+```{r DISTRIB 1}
+## calculate mean of mean temp and std dev
+idata2.mth.mt <- idata2 %>% group_by(Year) %>% summarize(
+  mean.meant=mean(Mean.Temp),
+  sd.meant=sd(Mean.Temp)
+)
+idata2.mth.mt <- idata2.mth.mt %>% mutate(
+  onesd.below=mean.meant-sd.meant,
+  onesd.above=mean.meant+sd.meant
+)
+idata2.mth.mt
+
+```
+
+```{r DISTRIB VIZ 1}
+chart.title <- "Mean temperatures: mean +/- 1 st dev"
+ggplot(idata2.mth.mt, aes(x=Year, y=mean.meant))+geom_col(fill=color.bar)+
+  geom_errorbar(ymin=idata2.mth.mt$onesd.below, 
+                                   ymax=idata2.mth.mt$onesd.above, width=0.25)+
+   scale_y_continuous(expand=c(0,0), limits=c(0,max(idata2.mth.mt$onesd.above)+0.5))+
+  theme_minimal()+
+  labs(title=chart.title)
+
+chart.title <- "Mean temp distribution each yr"
+ggplot(idata2, aes(x=as.factor(Year), y=Mean.Temp))+geom_boxplot(fill=color.bar)+
+  theme_minimal()+
+  labs(title=chart.title)
+
+```
+
+### Are the mean temperatures different at a level of statistical significance?
+
+Easy answer: 'Yes', because we have full 'population' data and so we have the 'true' means to compare.
+
+The idea here is to apply stastistical methods as if it were sampled data. 
