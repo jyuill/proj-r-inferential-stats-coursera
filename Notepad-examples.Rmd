@@ -105,3 +105,62 @@ ggplot(idata2, aes(x=as.factor(Year), y=Mean.Temp))+geom_boxplot(fill=color.bar)
 Easy answer: 'Yes', because we have full 'population' data and so we have the 'true' means to compare.
 
 The idea here is to apply stastistical methods as if it were sampled data. 
+
+#### Histograms
+
+##### Faceted
+
+Dotted lines = mean temp
+
+```{r HIST1}
+
+ggplot(idata2, aes(x=Mean.Temp))+geom_histogram(fill=color.bar)+
+  geom_vline(data=idata2.mth.mt, aes(xintercept=mean.meant), linetype='dashed')+
+  facet_grid(Year~.)+theme_bw()
+
+```
+
+##### Overlaid
+
+```{r HIST2}
+ggplot(idata2, aes(x=Mean.Temp, fill=as.factor(Year)))+geom_histogram(alpha=0.5)+
+  theme_minimal()
+```
+
+#### Density plot comparison
+
+```{r DENSITY}
+ggplot(idata2, aes(x=Mean.Temp, color=as.factor(Year)))+geom_density(size=1)+
+  theme_minimal()
+```
+
+#### Statistical Testing
+
+* Create separate datasets with mean temp for each period
+* Apply t-test to each dataset individually first to test hypotheses about the mean
+
+```{r TTEST DATA, echo=TRUE}
+## separate out years
+idata2.1 <- idata2 %>% filter(Year==2017)
+idata2.2 <- idata2 %>% filter(Year==2018)
+idata2.3 <- idata2 %>% filter(Year==2019)
+```
+
+T-test: sample 1
+
+```{r TTEST1, echo=TRUE}
+t.test(idata2.1$Mean.Temp)
+```
+
+T-test: sample 2
+
+```{r TTEST2, echo=TRUE}
+t.test(idata2.2$Mean.Temp)
+```
+
+T-test: sample 3
+
+```{r TTEST3, echo=TRUE}
+t.test(idata2.3$Mean.Temp)
+```
+
