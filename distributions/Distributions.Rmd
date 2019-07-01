@@ -129,9 +129,9 @@ source('data-frame-process.R')
 ```{r POIS}
 ## generate distribution sample
 dname <- 'poisson'
-
+lam <- 10
 ## set distribution parameters
-dist <- rpois(lambda=10, n=1000)
+dist <- rpois(lambda=lam, n=nn)
 ## set chart arrangement
 par(mfrow=(c(1,2)))
 ## show data and histogram
@@ -168,6 +168,17 @@ ggplot(df.norm, aes(x=values))+geom_density(color='red')
 grid.arrange(h, cd, nrow=1)
 ```
 
+...or better yet: overlay density of sample data with ideal normal curve for same mean and sd
+
+```{r}
+df.norm <- df.norm %>%
+  mutate(normprob=dnorm(values, mean=m, sd=s))
+
+ggplot(df.norm, aes(x=values))+geom_density(color='blue')+
+  geom_line(aes(x=values, y=normprob), color='red')+theme_bw()
+```
+
+
 ### Statistically
 
 ```{r NORM2}
@@ -177,11 +188,18 @@ shapiro.test(df.norm$values)
 
 Null hypothesis (normality) is not refuted, as shown by high p-value.
 
-```{r}
-df.norm <- df.norm %>%
-  mutate(normprob=dnorm(values, mean=m, sd=s))
+### With other distributions
 
-ggplot(df.norm, aes(x=values))+geom_density(color='blue')+
-  geom_line(aes(x=values, y=normprob), color='red')
+```{r}
+
+df.poisson <- df.dist.all %>% mutate(normprob=dnorm(values, mean=lam, sd=s))
+
+ggplot(df.poisson, aes(x=values))+geom_density(color='blue')+
+  geom_line(aes(x=values, y=normprob), color='red')+theme_bw()
+
+shapiro.test(df.poisson$values)
+
 ```
+
+
 
