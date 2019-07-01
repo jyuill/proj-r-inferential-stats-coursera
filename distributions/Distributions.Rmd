@@ -9,7 +9,9 @@ output: html_document
 ## basic settings
 knitr::opts_chunk$set(echo = TRUE,
                       message=FALSE,
-                      warning=FALSE
+                      warning=FALSE,
+                      fig.height=4,
+                      fig.width=8
                       )
 
 ## load common libraries
@@ -108,7 +110,9 @@ source('data-frame-process.R')
 dname <- 'binomial'
 
 ## set distribution parameters
-dist <- rbinom(n=nn, size=1, prob = pr)
+## decrease nn because need only small number to show binomial
+## and with more it stretches y-axis when comparing
+dist <- rbinom(n=nn/10, size=1, prob = pr)
 ## set chart arrangement
 par(mfrow=(c(1,2)))
 ## show data and histogram
@@ -146,6 +150,29 @@ source('data-frame-process.R')
 
 ggplot(df.dist.all, aes(x=values, color=distribution))+geom_density()
   
-
 ```
 
+## Normality Testing
+
+### Visually
+
+```{r NORM1}
+
+df.norm <- df.dist.all %>% filter(distribution=='normal') 
+
+h <- ggplot(df.norm, aes(x=values))+geom_histogram(fill=NA, color='blue')
+
+cd <- 
+ggplot(df.norm, aes(x=values))+geom_density(color='red')
+
+grid.arrange(h, cd, nrow=1)
+```
+
+### Statistically
+
+```{r NORM2}
+## from: http://www.sthda.com/english/wiki/normality-test-in-r
+shapiro.test(df.norm$values)
+```
+
+Null hypothesis (normality) is not refuted, as shown by high p-value.
