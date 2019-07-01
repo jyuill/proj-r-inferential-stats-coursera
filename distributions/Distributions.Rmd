@@ -176,3 +176,12 @@ shapiro.test(df.norm$values)
 ```
 
 Null hypothesis (normality) is not refuted, as shown by high p-value.
+
+```{r}
+df.norm <- df.norm %>%
+  mutate(normprob=dnorm(values, mean=m, sd=s))
+
+ggplot(df.norm, aes(x=values))+geom_density(color='blue')+
+  geom_line(aes(x=values, y=normprob), color='red')
+```
+
