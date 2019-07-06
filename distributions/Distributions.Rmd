@@ -129,7 +129,7 @@ source('data-frame-process.R')
 ```{r POIS}
 ## generate distribution sample
 dname <- 'poisson'
-lam <- 10
+lam <- 4
 ## set distribution parameters
 dist <- rpois(lambda=lam, n=nn)
 ## set chart arrangement
