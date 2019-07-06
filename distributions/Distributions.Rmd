@@ -140,6 +140,37 @@ hist(dist)
 
 ```
 
+* Poisson moves toward normal as lambda increases
+* Poisson is a discrete distribution, which I believe is what can account for gaps in the histogram bars
+
+```{r}
+par(mfrow=c(2,2))
+hist(rpois(n=10000, lambda = 1))
+hist(rpois(n=10000, lambda = 4))
+hist(rpois(n=10000, lambda = 16))
+hist(rpois(n=10000, lambda = (16*16)))
+```
+
+So how to use a Poisson distribution to simulate skewed data, if the mean is large?
+
+* Set the lambda low and then scale it up by multiplying the distribution
+
+```{r}
+## to simulate data set with high mean
+scaleup <- 12000
+samlambda <- 2
+par(mfrow=c(1,3))
+hist(rpois(n=10000, lambda = samlambda))
+hist(rpois(n=10000, lambda=samlambda*scaleup))
+hist(rpois(n=10000, lambda = samlambda)*scaleup)
+
+```
+
+* left: distribution with lambda = `r samlambda`
+* center: distribution with lambda = `r samlambda*scaleup` (basically normal)
+* right: distribution with lambda = `r samlambda` but transformed over so that mean = `r samlambda*scaleup`
+* Not sure about the gaps in distribution, though
+
 ```{r, echo=FALSE}
 source('data-frame-process.R')
 ```
@@ -181,6 +212,19 @@ ggplot(df.norm, aes(x=values))+geom_histogram(aes(y=..density..), fill='lightblu
   geom_line(aes(x=values, y=normprob), color='red')+theme_bw()
 ```
 
+### Q-Q (quantile-quantile) plot
+
+* shows correlation of data with theoretical normal distribution
+* provides 45-degree line for reference: the more the points align with the line the more normal the distribution of the data is 
+* can use ggplot but the ggpubr pkg is even handier (and shows confidence interval)
+
+```{r QQ PLOT}
+library(ggpubr)
+ggqqplot(df.norm$values)
+```
+
+Pretty tight - looks normal!
+
 ### Statistically
 
 ```{r NORM2}
@@ -188,9 +232,13 @@ ggplot(df.norm, aes(x=values))+geom_histogram(aes(y=..density..), fill='lightblu
 shapiro.test(df.norm$values)
 ```
 
-Null hypothesis (normality) is not refuted, as shown by high p-value.
+Null hypothesis: the data are not significantly different from normal. If there's a low p-value can we reject the null hypothesis, and consider the data to NOT follow a normal distribution.
+
+In this case, high p-value confirms null hypothesis that the data fits normal distribution. Relax...it's normal!
 
 ### With other distributions
+
+#### Poisson
 
 ```{r}
 
