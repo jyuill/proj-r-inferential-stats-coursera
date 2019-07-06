@@ -56,11 +56,14 @@ p.avesp.lg <- ggplot(df.avesp, aes(x=avesp.lg))+geom_histogram()+
 ## use grid arrange to display charts together
 grid.arrange(p.avesp, p.avesp.lg, nrow=2)
 
-## looking at different distributions
-pois1 <- rpois(n=100, lambda = 3)
+## looking at different distributions: Poisson
+lam <- 3000
+pois1 <- rpois(n=100, lambda = lam)
 par(mfrow=c(1,2))
 plot(pois1)
 hist(pois1)
+
+## can be unpredictable: not very skewed and at higher lambdas looks pretty normal
 
 ## QUESTIONS:
 ## 1. how to transform log dist into original units?

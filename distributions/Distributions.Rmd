@@ -176,8 +176,10 @@ df.norm <- df.norm %>%
 
 ggplot(df.norm, aes(x=values))+geom_density(color='blue')+
   geom_line(aes(x=values, y=normprob), color='red')+theme_bw()
-```
 
+ggplot(df.norm, aes(x=values))+geom_histogram(aes(y=..density..), fill='lightblue', color='blue')+
+  geom_line(aes(x=values, y=normprob), color='red')+theme_bw()
+```
 
 ### Statistically
 
@@ -201,5 +203,34 @@ shapiro.test(df.poisson$values)
 
 ```
 
+Comparing Poisson distributions with different levels of lambda
+
+```{r}
+df.pois.all <- data.frame()
+for(i in 1:4){
+  lam <- 10^i
+  examplelam <- paste0('example',lam)
+  pois <- rpois(n=100, lambda = lam)
+  df.pois <- data.frame(example=examplelam,
+                        values=pois)
+  df.pois <- df.pois %>% mutate(
+    normprob=dnorm(values, mean=lam, sd=sd(df.pois$values))
+  )
+  df.pois.all <- bind_rows(df.pois.all, df.pois)
+}
+## function for generating plots of all four variations
+plotGen <- function(data, enum){
+  data <- data %>% filter(example==paste0('example',enum))
+  ggplot(data, aes(x=values))+geom_density(color='blue')+
+    geom_line(aes(y=normprob), color='red', linetype='dashed')
+} 
+## use function to generate plots for each variation
+pp100 <- plotGen(df.pois.all, 10)
+pp200 <- plotGen(df.pois.all, 100)
+pp300 <- plotGen(df.pois.all, 1000)
+pp400 <- plotGen(df.pois.all, 10000)
+## display plots in grid
+grid.arrange(pp100, pp200, pp300, pp400, nrow=2)
+```
 
 
